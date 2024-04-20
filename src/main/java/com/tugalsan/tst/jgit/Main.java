@@ -14,15 +14,33 @@ public class Main {
     //java --enable-preview --add-modules jdk.incubator.vector -jar target/com.tugalsan.tst.jgit-1.0-SNAPSHOT-jar-with-dependencies.jar
     //java -jar target/com.tugalsan.tst.jgit-1.0-SNAPSHOT-jar-with-dependencies.jar
     public static void main(String... args) {
+        d.cr("main", "workSpaces", "------------------------------------------");
         var workSpaces = List.of("api", "lib", "app", "spi")
                 .stream()
                 .map(s -> Path.of("D:/git/" + s))
                 .toList();
+        workSpaces.forEach(ws -> d.cr("main", "workSpaces", "------------------------------------------"));
         workSpaces.forEach(ws -> d.cr("main", "workSpace", ws));
+
+        d.cr("main", "repositories", "------------------------------------------");
         var repositories = workSpaces.stream()
                 .flatMap(p -> TS_DirectoryUtils.subDirectories(p, true, false).stream())
                 .toList();
-        workSpaces.forEach(rep -> d.cr("main", "repository", rep));
-//        TS_JGitUtils.listBranchNames(at)
+        repositories.forEach(rep -> d.cr("main", "repository", rep));
+
+        d.cr("main", "branchNames", "------------------------------------------");
+        repositories.forEach(repo -> {
+            var repoName = TS_DirectoryUtils.getName(repo);
+            var u = TS_JGitUtils.listBranchNames(repo);
+            if (u.isExcuse()) {
+                d.ce("main", "branchNames", repoName, u.excuse().getMessage());
+            } else {
+                d.cr("main", "branchNames", repoName);
+                u.value().stream().map(b -> b.name()).toList().forEach(name -> {
+                    d.cr("main", "branchNames", "-", name);
+                });
+            }
+        });
+
     }
 }
